@@ -2,7 +2,7 @@
   
 # 🍋 Lemonade Stand
 
-> come get your lemonades
+> A centralized hub for interacting with [Lemonade](https://github.com/Jaezmien/lemonade).
  
 </div>
 
