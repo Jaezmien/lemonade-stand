@@ -4,12 +4,17 @@ import (
 	"errors"
 	"sync"
 
+	"git.jaezmien.com/Jaezmien/lemonade-stand/chunk"
 	"git.jaezmien.com/Jaezmien/lemonade-stand/encoder"
 )
 
 var ErrBufferExists = errors.New("buffer already exists for id")
 var ErrBufferNotExists = errors.New("buffer doesn't exist for id")
 var ErrManagerEmpty = errors.New("manager is empty")
+
+const (
+	MAXIMUM_BUFFER_LENGTH = 29 - 3
+)
 
 type LemonadeBufferSet uint
 
@@ -18,25 +23,7 @@ const (
 	BUFFER_END     LemonadeBufferSet = 1
 )
 
-type LemonadeBuffer struct {
-	Buffer []int32
-	Set    LemonadeBufferSet
-}
-
-func NewBuffer() *LemonadeBuffer {
-	return &LemonadeBuffer{
-		Buffer: make([]int32, 0),
-		Set:    BUFFER_END,
-	}
-}
-
-func (b *LemonadeBuffer) AppendBuffer(data []int32) []int32 {
-	b.Buffer = append(b.Buffer, data...)
-	return b.Buffer
-}
-func (b *LemonadeBuffer) DecodeToString() (string, error) {
-	return encoder.BufferToString(b.Buffer)
-}
+// --- //
 
 type LemonadeBufferManager struct {
 	Buffers map[int32]*LemonadeBuffer
@@ -60,6 +47,30 @@ func (m *LemonadeBufferManager) GetFirstID() (int32, error) {
 
 	return -1, ErrManagerEmpty
 }
+
+// --- //
+
+type LemonadeBuffer struct {
+	Buffer []int32
+	Set    LemonadeBufferSet
+}
+
+func NewBuffer() *LemonadeBuffer {
+	return &LemonadeBuffer{
+		Buffer: make([]int32, 0),
+		Set:    BUFFER_END,
+	}
+}
+
+func (b *LemonadeBuffer) AppendBuffer(data []int32) []int32 {
+	b.Buffer = append(b.Buffer, data...)
+	return b.Buffer
+}
+func (b *LemonadeBuffer) DecodeToString() (string, error) {
+	return encoder.BufferToString(b.Buffer)
+}
+
+// --- //
 
 func (m *LemonadeBufferManager) HasBuffer(id int32) bool {
 	_, ok := m.Buffers[id]
@@ -106,4 +117,18 @@ func (m *LemonadeBufferManager) CloseBuffer(id int32) {
 	defer m.m.Unlock()
 
 	delete(m.Buffers, id)
+}
+
+func SplitBuffer(buffer []int32) [][]int32 {
+	s := make([][]int32, 0)
+
+	if len(buffer) <= MAXIMUM_BUFFER_LENGTH {
+		s = append(s, buffer)
+	} else {
+		chunk.ChunkSlice(buffer, MAXIMUM_BUFFER_LENGTH, func(partialSlice []int32, _ bool) {
+			s = append(s, buffer)
+		})
+	}
+
+	return s
 }

@@ -37,5 +37,4 @@ const (
 
 const (
 	INIT_EXPECTED_VALUE   = 56
-	MAXIMUM_BUFFER_LENGTH = 29 - 3
 )
