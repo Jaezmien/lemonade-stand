@@ -19,23 +19,23 @@ $ sudo go run . # If you're running on Linux
 
 ## GET `/`
 
-Returns either an empty array, or a JSON array of the entire current state of the external memory region.
+Returns either an empty array, or an integer array of the entire current values of the external memory region.
 
 ## GET `/ws`
 
 | Query | Type | Required | Description |
 | --- | --- | --- | --- |
-| `appid` | `int` | yes | The AppID the client will be listening on |
+| `appid` | `int` | yes | The application id the client will be listening on |
 
 ### Receiving Messages
 
-The client will be receiving a `binary` message, with the first byte of data indicating the type of message.
+The websocket client will be receiving a `binary` message, with the first byte of data indicating the type of message.
 
 | Value | Description | Notes |
 | --- | --- | --- |
 | `0x1` | NotITG has initialized | |
 | `0x2` | NotITG has exited | |
-| `0x3` | NotITG has send a buffer to the client | The buffer content is the rest of the data after `0x3`. |
+| `0x3` | NotITG has sent a buffer to the client | The buffer content is the rest of the data after `0x3`. |
 
 ### Sending Messages
 
