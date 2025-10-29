@@ -230,6 +230,10 @@ func (l *LemonadeStand) write() {
 		panic("writemanager dequeue returned nil")
 	}
 
+	if len(buf.Buffer) > buffer.MAXIMUM_BUFFER_LENGTH {
+		panic(fmt.Sprintf("attempted to overflow write buffer (len %d)", len(buf.Buffer)))
+	}
+
 	for idx, value := range buf.Buffer {
 		flagIdx := INCOMING_DATA_START + idx
 		l.NotITG.SetExternal(flagIdx, value)
@@ -315,7 +319,7 @@ func (l *LemonadeStand) Run() {
 					continue
 				}
 				l.logger.Info("notitg has initialized")
-				
+
 				if l.OnConnect != nil {
 					l.OnConnect(l)
 				}
