@@ -126,7 +126,7 @@ func SplitBuffer(buffer []int32) [][]int32 {
 		s = append(s, buffer)
 	} else {
 		chunk.ChunkSlice(buffer, MAXIMUM_BUFFER_LENGTH, func(partialSlice []int32, _ bool) {
-			s = append(s, buffer)
+			s = append(s, partialSlice)
 		})
 	}
 
