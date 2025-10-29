@@ -241,6 +241,8 @@ func (l *LemonadeStand) write() {
 	l.NotITG.SetExternal(INCOMING_ID, appid)
 	l.NotITG.SetExternal(INCOMING_STATE, STATE_INCOMING_AVAILABLE)
 
+	l.writeManager.CloseBuffer(appid)
+
 	l.logger.Debug(
 		"written buffer to notitg",
 		slog.String("data", fmt.Sprintf("%+v", buffer.Buffer)),
