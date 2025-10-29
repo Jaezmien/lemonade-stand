@@ -65,7 +65,7 @@ func (m *LemonadeBufferManager) HasBuffer(id int32) bool {
 	_, ok := m.Buffers[id]
 	return ok
 }
-func (m *LemonadeBufferManager) NewBuffer(id int32) (*LemonadeBuffer, error) {
+func (m *LemonadeBufferManager) TryNewBuffer(id int32) (*LemonadeBuffer, error) {
 	if m.HasBuffer(id) {
 		return nil, ErrBufferExists
 	}
@@ -76,9 +76,9 @@ func (m *LemonadeBufferManager) NewBuffer(id int32) (*LemonadeBuffer, error) {
 	m.Buffers[id] = NewBuffer()
 	return m.Buffers[id], nil
 }
-func (m *LemonadeBufferManager) TryNewBuffer(id int32) *LemonadeBuffer {
+func (m *LemonadeBufferManager) NewBuffer(id int32) *LemonadeBuffer {
 	if !m.HasBuffer(id) {
-		m.NewBuffer(id)
+		m.TryNewBuffer(id)
 	}
 
 	b, ok := m.Buffers[id]

@@ -7,7 +7,7 @@ import (
 func TestManager(t *testing.T) {
 	t.Run("should create and delete buffer", func(t *testing.T) {
 		m := NewManager()
-		_, err := m.NewBuffer(1)
+		_, err := m.TryNewBuffer(1)
 
 		if err != nil {
 			t.Error(err)
@@ -27,7 +27,7 @@ func TestManager(t *testing.T) {
 
 	t.Run("should append to buffer", func(t *testing.T) {
 		m := NewManager()
-		b, _ := m.NewBuffer(1)
+		b, _ := m.TryNewBuffer(1)
 
 		if d := b.AppendBuffer([]int32{1}); len(d) != 1 || d[0] != 1 {
 			t.Error("expected appended buffer")
@@ -37,8 +37,8 @@ func TestManager(t *testing.T) {
 	t.Run("should manage multiple buffers", func(t *testing.T) {
 		m := NewManager()
 
-		b1, _ := m.NewBuffer(1)
-		b2, _ := m.NewBuffer(2)
+		b1, _ := m.TryNewBuffer(1)
+		b2, _ := m.TryNewBuffer(2)
 
 		if d := b1.AppendBuffer([]int32{1}); len(d) != 1 || d[0] != 1 {
 			t.Error("expected appended buffer 1")
@@ -51,8 +51,8 @@ func TestManager(t *testing.T) {
 	t.Run("should return an id", func(t *testing.T) {
 		m := NewManager()
 
-		m.NewBuffer(1)
-		m.NewBuffer(2)
+		m.TryNewBuffer(1)
+		m.TryNewBuffer(2)
 
 		id, err := m.GetFirstID()
 		if err != nil {
@@ -68,10 +68,10 @@ func TestManager(t *testing.T) {
 	t.Run("should return the same buffer if it exists", func(t *testing.T) {
 		m := NewManager()
 
-		b1, _ := m.NewBuffer(1)
+		b1, _ := m.TryNewBuffer(1)
 		b1.AppendBuffer([]int32{1})
 
-		b2 := m.TryNewBuffer(1)
+		b2 := m.NewBuffer(1)
 		if b1.Buffer[0] != b2.Buffer[0] {
 			t.Error("buffer data mismatch")
 			return
