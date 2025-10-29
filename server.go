@@ -91,6 +91,8 @@ func (s *Server) NewClient(con *websocket.Conn, appid int32) *Client {
 		con: con,
 		appid: appid,
 		server: s,
+
+		Send: make(chan []byte),
 	}	
 	go c.Read()
 	go c.Write()
