@@ -52,6 +52,8 @@ func (s *Server) Run() {
 }
 
 func (s *Server) JoinClient(c *Client) {
+	s.Stand.logger.Debug("client has connected")
+
 	s.Clients[c] = true
 
 	if s.Stand.HasNotITG() {
@@ -59,6 +61,8 @@ func (s *Server) JoinClient(c *Client) {
 	}
 }
 func (s *Server) CloseClient(c *Client) {
+	s.Stand.logger.Debug("client has disconnected")
+
 	if _, ok := s.Clients[c]; ok {
 		c.Close()
 		delete(s.Clients, c)
