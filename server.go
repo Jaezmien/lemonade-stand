@@ -9,19 +9,19 @@ type Server struct {
 	Stand *LemonadeStand
 
 	Clients map[*Client]bool
-	Join chan *Client
-	Leave chan *Client
+	Join    chan *Client
+	Leave   chan *Client
 
 	Quit chan struct{}
 }
 
 func NewServer(l *LemonadeStand) *Server {
 	return &Server{
-		Stand: l,
+		Stand:   l,
 		Clients: make(map[*Client]bool),
-		Join: make(chan *Client),
-		Leave: make(chan *Client),
-		Quit: make(chan struct{}),
+		Join:    make(chan *Client),
+		Leave:   make(chan *Client),
+		Quit:    make(chan struct{}),
 	}
 }
 
@@ -80,7 +80,9 @@ func (s *Server) Broadcast(data []byte) {
 }
 func (s *Server) BroadcastToID(data []byte, appid int32) {
 	for c := range s.Clients {
-		if c.appid != appid { continue }
+		if c.appid != appid {
+			continue
+		}
 
 		select {
 		case c.Send <- data:
@@ -92,12 +94,12 @@ func (s *Server) BroadcastToID(data []byte, appid int32) {
 
 func (s *Server) NewClient(con *websocket.Conn, appid int32) *Client {
 	c := &Client{
-		con: con,
-		appid: appid,
+		con:    con,
+		appid:  appid,
 		server: s,
 
 		Send: make(chan []byte),
-	}	
+	}
 	go c.Read()
 	go c.Write()
 
@@ -108,7 +110,9 @@ func (s *Server) NewClient(con *websocket.Conn, appid int32) *Client {
 func (s *Server) GetClientsByID(appid int32) []*Client {
 	c := make([]*Client, 0)
 	for cl := range s.Clients {
-		if cl.appid != appid { continue }
+		if cl.appid != appid {
+			continue
+		}
 		c = append(c, cl)
 	}
 	return c
@@ -116,7 +120,7 @@ func (s *Server) GetClientsByID(appid int32) []*Client {
 
 func (s *Server) ReadMessage(m []int32, appid int32) {
 	split := buffer.SplitBuffer(m)
-	
+
 	for i, b := range split {
 		buf := s.Stand.writeManager.NewBuffer(appid)
 		buf.AppendBuffer(b)

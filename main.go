@@ -59,7 +59,7 @@ func main() {
 		server.BroadcastToID(
 			append(
 				[]byte{0x03},
-				data...
+				data...,
 			),
 			appid,
 		)

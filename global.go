@@ -36,5 +36,5 @@ const (
 )
 
 const (
-	INIT_EXPECTED_VALUE   = 56
+	INIT_EXPECTED_VALUE = 56
 )

@@ -10,22 +10,24 @@ import (
 
 type Client struct {
 	server *Server
-	con   *websocket.Conn
-	appid int32
+	con    *websocket.Conn
+	appid  int32
 
-	Send chan []byte
+	Send   chan []byte
 	exited bool
 }
 
 func (c *Client) Close() {
-	if c.exited { return }
+	if c.exited {
+		return
+	}
 	c.exited = true
 
 	c.con.Close()
 }
 
 func (c *Client) Read() {
-	readLoop:
+readLoop:
 	for {
 		t, message, err := c.con.ReadMessage()
 		if c.exited {
@@ -67,7 +69,7 @@ func (c *Client) Read() {
 }
 func (c *Client) Write() {
 	for message := range c.Send {
-		w, err := c.con.NextWriter(websocket.BinaryMessage)	
+		w, err := c.con.NextWriter(websocket.BinaryMessage)
 		if err != nil {
 			c.server.Stand.logger.Debug("error while creating client writer", slog.Any("error", err))
 			continue
