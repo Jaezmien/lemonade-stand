@@ -121,13 +121,17 @@ func (s *Server) GetClientsByID(appid int32) []*Client {
 func (s *Server) ReadMessage(m []int32, appid int32) {
 	split := buffer.SplitBuffer(m)
 
-	for i, b := range split {
-		buf := s.Stand.writeManager.NewBuffer(appid)
-		buf.AppendBuffer(b)
-		if i+1 == len(split) {
-			buf.Set = buffer.BUFFER_END
-		} else {
-			buf.Set = buffer.BUFFER_PARTIAL
+	for i, bufferSlice := range split {
+		b := &buffer.WriterBuffer{
+			Buffer: bufferSlice,
 		}
+
+		if i+1 == len(split) {
+			b.Set = buffer.BUFFER_END
+		} else {
+			b.Set = buffer.BUFFER_PARTIAL
+		}
+
+		s.Stand.writeManager.Queue(appid, b)
 	}
 }

@@ -33,8 +33,8 @@ type LemonadeStand struct {
 	exit      chan struct{}
 	isRunning bool
 
-	readManager  *buffer.LemonadeBufferManager
-	writeManager *buffer.LemonadeBufferManager
+	readManager  *buffer.ReaderManager
+	writeManager *buffer.WriterManager
 
 	logger        *slog.Logger
 	loggerEnabled bool
@@ -74,8 +74,8 @@ func NewLemonadeStand(options ...LemonadeStandOption) *LemonadeStand {
 		exit:       make(chan struct{}),
 		isRunning:  false,
 
-		readManager:  buffer.NewManager(),
-		writeManager: buffer.NewManager(),
+		readManager:  buffer.NewReaderManager(),
+		writeManager: buffer.NewWriterManager(),
 	}
 
 	for _, opt := range options {
@@ -181,10 +181,8 @@ func (l *LemonadeStand) read() {
 	l.NotITG.SetExternal(OUTGOING_ID, 0)
 	l.NotITG.SetExternal(OUTGOING_STATE, STATE_OUTGOING_IDLE)
 
-	buff := l.readManager.NewBuffer(appid)
-
 	if isBufferEnd {
-		data := buff.AppendBuffer(readBuffer)
+		data := l.readManager.AppendBuffer(appid, readBuffer)
 
 		if l.OnRead != nil {
 			l.OnRead(l, appid, readBuffer)
@@ -199,12 +197,13 @@ func (l *LemonadeStand) read() {
 
 		l.readManager.CloseBuffer(appid)
 	} else {
-		buff.AppendBuffer(readBuffer)
+		l.readManager.AppendBuffer(appid, readBuffer)
 	}
 }
 
 func (l *LemonadeStand) hasWriteBuffer() bool {
-	return l.writeManager.Count() > 0
+	_, ok := l.writeManager.GetFirstID()
+	return ok
 }
 func (l *LemonadeStand) isIncomingAvailable() bool {
 	return l.NotITG.GetExternal(INCOMING_STATE) == STATE_INCOMING_IDLE
@@ -221,32 +220,30 @@ func (l *LemonadeStand) write() {
 
 	l.NotITG.SetExternal(INCOMING_STATE, STATE_INCOMING_BUSY)
 
-	appid, err := l.writeManager.GetFirstID()
-	if err != nil {
-		panic(err)
+	appid, ok := l.writeManager.GetFirstID()
+	if !ok {
+		return
 	}
 
-	buffer, err := l.writeManager.TryGetBuffer(appid)
-	if err != nil {
-		panic(err)
+	buf := l.writeManager.Dequeue(appid)
+	if buf == nil {
+		panic("writemanager dequeue returned nil")
 	}
 
-	for idx, value := range buffer.Buffer {
+	for idx, value := range buf.Buffer {
 		flagIdx := INCOMING_DATA_START + idx
 		l.NotITG.SetExternal(flagIdx, value)
 	}
-	l.NotITG.SetExternal(INCOMING_LENGTH, int32(len(buffer.Buffer)))
+	l.NotITG.SetExternal(INCOMING_LENGTH, int32(len(buf.Buffer)))
 
-	l.NotITG.SetExternal(INCOMING_TYPE, int32(buffer.Set))
+	l.NotITG.SetExternal(INCOMING_TYPE, int32(buf.Set))
 	l.NotITG.SetExternal(INCOMING_ID, appid)
 	l.NotITG.SetExternal(INCOMING_STATE, STATE_INCOMING_AVAILABLE)
 
-	l.writeManager.CloseBuffer(appid)
-
 	l.logger.Debug(
 		"written buffer to notitg",
-		slog.String("data", fmt.Sprintf("%+v", buffer.Buffer)),
-		slog.Int("length", len(buffer.Buffer)),
+		slog.String("data", fmt.Sprintf("%+v", buf.Buffer)),
+		slog.Int("length", len(buf.Buffer)),
 		slog.Int("appid", int(appid)),
 	)
 }
