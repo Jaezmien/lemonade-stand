@@ -29,12 +29,14 @@ func (c *Client) Close() {
 func (c *Client) Read() {
 readLoop:
 	for {
+		slogAppID := slog.Int("appid", int(c.appid))
+
 		t, message, err := c.con.ReadMessage()
 		if c.exited {
 			return
 		}
 		if err != nil {
-			c.server.Stand.logger.Debug("error on read messsage", slog.Any("error", err))
+			c.server.Stand.logger.Debug("error on read messsage", slog.Any("error", err), slogAppID)
 			break
 		}
 
@@ -47,21 +49,22 @@ readLoop:
 		case websocket.BinaryMessage:
 			data, err = bytebuffer.BytesToBuffer(message)
 			if err != nil {
-				c.server.Stand.logger.Warn("received invalid client buffer", slog.Int("appid", int(c.appid)))
+				c.server.Stand.logger.Warn("received invalid client buffer", slogAppID)
 				continue
 			}
 		case websocket.TextMessage:
 			// Fine, we'll handle your TextMessage
 			data, err = encoder.StringToBuffer(string(message))
 			if err != nil {
-				c.server.Stand.logger.Warn("received invalid client text", slog.Int("appid", int(c.appid)))
+				c.server.Stand.logger.Warn("received invalid client text", slogAppID)
 				continue
 			}
 		default:
-			c.server.Stand.logger.Debug("invalid message type")
+			c.server.Stand.logger.Debug("invalid message type", slogAppID)
 			continue readLoop
 		}
 
+		c.server.Stand.logger.Debug("received client message", slogAppID)
 		c.server.ReadMessage(data, c.appid)
 	}
 
