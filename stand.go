@@ -284,10 +284,6 @@ func (l *LemonadeStand) Run() {
 					}
 
 					l.logger.Info("notitg found")
-
-					if l.OnConnect != nil {
-						l.OnConnect(l)
-					}
 				} else if l.heartbeatStatus == HEARTBEAT_EXITED {
 					l.heartbeatStatus = HEARTBEAT_NOTFOUND
 					l.initialized = false
@@ -322,6 +318,10 @@ func (l *LemonadeStand) Run() {
 					continue
 				}
 				l.logger.Info("notitg has initialized")
+				
+				if l.OnConnect != nil {
+					l.OnConnect(l)
+				}
 
 				l.initialized = true
 				ticker.Reset(time.Millisecond * l.tickRateMs)
