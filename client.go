@@ -11,16 +11,20 @@ type Client struct {
 	appid int32
 
 	Send chan []byte
+	exited bool
 }
 
 func (c *Client) Close() {
+	if c.exited { return }
+	c.exited = true
+
 	c.con.Close()
 }
 
 func (c *Client) Read() {
 	for {
 		t, message, err := c.con.ReadMessage()
-		if err != nil {
+		if c.exited {
 			return
 		}
 		if t != websocket.BinaryMessage {
@@ -38,6 +42,8 @@ func (c *Client) Read() {
 
 		c.server.ReadMessage(data, c.appid)
 	}
+
+	c.server.CloseClient(c)
 }
 func (c *Client) Write() {
 	for message := range c.Send {
