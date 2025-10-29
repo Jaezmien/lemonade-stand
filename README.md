@@ -14,6 +14,14 @@ $ go mod tidy
 $ go run .
 $ sudo go run . # If you're running on Linux
 ```
+# Flags
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `deep` | No | `false` | Scans for NotITG by forcefully reading every program's memory |
+| `pid` | No | `0` | Use a specific process |
+| `verbose` | No | `false` | Enable debug messages |
+| `port` | No | `8000` | The default port to run the server on |
 
 # Routes
 
