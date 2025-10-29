@@ -34,7 +34,7 @@ func (c *Client) Read() {
 			break
 		}
 		if len(message) == 0 {
-			return
+			continue
 		}
 
 		data, err := bytebuffer.BytesToBuffer(message)
@@ -52,11 +52,13 @@ func (c *Client) Write() {
 	for message := range c.Send {
 		w, err := c.con.NextWriter(websocket.BinaryMessage)	
 		if err != nil {
-			return
+			c.server.Stand.logger.Debug("error while creating client writer", slog.Any("error", err))
+			continue
 		}
 		w.Write(message)
 		if err := w.Close(); err != nil {
-			return
+			c.server.Stand.logger.Debug("error while closing client writer", slog.Any("error", err))
+			continue
 		}
 	}
 }
