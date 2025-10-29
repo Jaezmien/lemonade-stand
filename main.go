@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"strconv"
 
+	"git.jaezmien.com/Jaezmien/lemonade-stand/bytebuffer"
 	"github.com/Jaezmien/notitg-external-go"
 	"github.com/gorilla/websocket"
 )
@@ -39,11 +40,29 @@ func main() {
 		WithTickRate(10),
 	)
 
-	s.OnRead = func(l *LemonadeStand, appid int32, buffer []int32) {
-		// TODO:
+	server := NewServer(s)
+	go server.Run()
+
+	s.OnConnect = func(l *LemonadeStand) {
+		server.Broadcast([]byte{0x01})
 	}
 	s.OnExit = func(l *LemonadeStand) {
-		// TODO:
+		server.Broadcast([]byte{0x02})
+	}
+	s.OnRead = func(l *LemonadeStand, appid int32, buffer []int32) {
+		data, err := bytebuffer.BufferToBytes(buffer)
+		if err != nil {
+			l.logger.Error("error while converting buffer to []byte", slog.Any("error", err))
+			return
+		}
+
+		server.BroadcastToID(
+			append(
+				[]byte{0x03},
+				data...
+			),
+			appid,
+		)
 	}
 	s.OnClose = func(l *LemonadeStand) {
 		done <- true
@@ -67,9 +86,9 @@ func main() {
 			return
 		}
 
-		_ = int32(i)
+		appid := int32(i)
 
-		_, err = upgrader.Upgrade(w, r, nil)
+		con, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			s.logger.Error("error in upgrading connection", slog.Any("err", err))
 
@@ -78,7 +97,7 @@ func main() {
 			return
 		}
 
-		// TODO:
+		server.NewClient(con, appid)
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
