@@ -53,6 +53,10 @@ func (s *Server) Run() {
 
 func (s *Server) JoinClient(c *Client) {
 	s.Clients[c] = true
+
+	if s.Stand.HasNotITG() {
+		c.Send <- []byte{0x01}
+	}
 }
 func (s *Server) CloseClient(c *Client) {
 	if _, ok := s.Clients[c]; ok {
