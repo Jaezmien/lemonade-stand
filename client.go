@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log/slog"
+
 	"git.jaezmien.com/Jaezmien/lemonade-stand/bytebuffer"
 	"github.com/gorilla/websocket"
 )
@@ -27,8 +29,9 @@ func (c *Client) Read() {
 		if c.exited {
 			return
 		}
-		if t != websocket.BinaryMessage {
-			return
+		if err != nil {
+			c.server.Stand.logger.Debug("error on read messsage", slog.Any("error", err))
+			break
 		}
 		if len(message) == 0 {
 			return
