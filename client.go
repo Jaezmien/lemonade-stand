@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"git.jaezmien.com/Jaezmien/lemonade-stand/bytebuffer"
+	"git.jaezmien.com/Jaezmien/lemonade-stand/encoder"
 	"github.com/gorilla/websocket"
 )
 
@@ -24,6 +25,7 @@ func (c *Client) Close() {
 }
 
 func (c *Client) Read() {
+	readLoop:
 	for {
 		t, message, err := c.con.ReadMessage()
 		if c.exited {
@@ -33,14 +35,29 @@ func (c *Client) Read() {
 			c.server.Stand.logger.Debug("error on read messsage", slog.Any("error", err))
 			break
 		}
+
 		if len(message) == 0 {
 			continue
 		}
 
-		data, err := bytebuffer.BytesToBuffer(message)
-		if err != nil {
-			c.server.Stand.logger.Warn("invalid client message")
-			return
+		var data []int32
+		switch t {
+		case websocket.BinaryMessage:
+			data, err = bytebuffer.BytesToBuffer(message)
+			if err != nil {
+				c.server.Stand.logger.Warn("received invalid client buffer", slog.Int("appid", int(c.appid)))
+				continue
+			}
+		case websocket.TextMessage:
+			// Fine, we'll handle your TextMessage
+			data, err = encoder.StringToBuffer(string(message))
+			if err != nil {
+				c.server.Stand.logger.Warn("received invalid client text", slog.Int("appid", int(c.appid)))
+				continue
+			}
+		default:
+			c.server.Stand.logger.Debug("invalid message type")
+			continue readLoop
 		}
 
 		c.server.ReadMessage(data, c.appid)
