@@ -20,14 +20,24 @@ var DeepScan = false
 var ProcessID = 0
 var Verbose = false
 var Port = 8080
+var Version = false
+
+var BuildVersion = "0.0.0-dev"
+var BuildCommit = "dev"
 
 func init() {
 	flag.BoolVar(&DeepScan, "deep", false, "Scan deeply by checking each process' memory")
 	flag.IntVar(&ProcessID, "pid", 0, "Use a specific process")
 	flag.BoolVar(&Verbose, "verbose", false, "Enable debug messages")
 	flag.IntVar(&Port, "port", 8000, "Sets the server port")
+	flag.BoolVar(&Version, "version", false, "Display version info")
 
 	flag.Parse()
+
+	if Version {
+		fmt.Printf("lemonade-stand v%s@%s\n", BuildVersion, BuildCommit)
+		os.Exit(0)
+	}
 }
 
 func main() {
