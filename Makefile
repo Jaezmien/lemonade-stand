@@ -9,6 +9,10 @@ LDFLAGS = -ldflags "-X main.BuildVersion=${VERSION} -X main.BuildCommit=${COMMIT
 
 all: clean linux windows
 
+test:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out
+
 clean:
 	rm -rf "${BUILD_DIR}"
 	mkdir "${BUILD_DIR}"
