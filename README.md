@@ -8,12 +8,20 @@
 
 # Usage
 ```bash
-# Requires Go 1.24.0+ 
+$ ./stand-linux-arch64
+```
+```cmd
+> stand-windows-arch64.exe
+```
+
+# Building
+```bash
+# Requires Go 1.25.3+ 
 
 $ go mod tidy
-$ go run .
-$ sudo go run . # If you're running on Linux
+$ make
 ```
+
 # Flags
 
 | Name | Required | Default | Description |
@@ -22,6 +30,7 @@ $ sudo go run . # If you're running on Linux
 | `pid` | No | `0` | Use a specific process |
 | `verbose` | No | `false` | Enable debug messages |
 | `port` | No | `8000` | The default port to run the server on |
+| `version` | No | `false` | Shows the version of the binary, and exits |
 
 # Routes
 
