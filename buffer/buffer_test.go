@@ -4,76 +4,103 @@ import (
 	"testing"
 )
 
-func TestManager(t *testing.T) {
+func TestWriterManager(t *testing.T) {
+	m := NewWriterManager()
+
 	t.Run("should create and delete buffer", func(t *testing.T) {
-		m := NewManager()
-		_, err := m.TryNewBuffer(1)
+		m.Queue(1, &WriterBuffer{
+			Buffer: []int32{1, 2, 3},
+			Set: BUFFER_END,
+		})
 
-		if err != nil {
-			t.Error(err)
+		b := m.Dequeue(1)
+		if len(b.Buffer) != 3 || b.Set != BUFFER_END {
+			t.Error("invalid buffer")
 			return
-		}
-		if m.Count() != 1 {
-			t.Error("count is not 1")
-			return
-		}
-
-		m.CloseBuffer(1)
-		if m.Count() != 0 {
-			t.Error("count is not 0")
-			return
-		}
-	})
-
-	t.Run("should append to buffer", func(t *testing.T) {
-		m := NewManager()
-		b, _ := m.TryNewBuffer(1)
-
-		if d := b.AppendBuffer([]int32{1}); len(d) != 1 || d[0] != 1 {
-			t.Error("expected appended buffer")
-		}
-	})
-
-	t.Run("should manage multiple buffers", func(t *testing.T) {
-		m := NewManager()
-
-		b1, _ := m.TryNewBuffer(1)
-		b2, _ := m.TryNewBuffer(2)
-
-		if d := b1.AppendBuffer([]int32{1}); len(d) != 1 || d[0] != 1 {
-			t.Error("expected appended buffer 1")
-		}
-		if d := b2.AppendBuffer([]int32{2}); len(d) != 1 || d[0] != 2 {
-			t.Error("expected appended buffer 2")
 		}
 	})
 
 	t.Run("should return an id", func(t *testing.T) {
-		m := NewManager()
+		m.Queue(1, &WriterBuffer{
+			Buffer: []int32{1, 2, 3},
+			Set: BUFFER_END,
+		})
+		m.Queue(2, &WriterBuffer{
+			Buffer: []int32{1, 2, 3},
+			Set: BUFFER_END,
+		})
 
-		m.TryNewBuffer(1)
-		m.TryNewBuffer(2)
-
-		id, err := m.GetFirstID()
-		if err != nil {
-			t.Error(err)
+		id, ok := m.GetFirstID()
+		if !ok {
+			t.Error("got no id")
 			return
 		}
 		if id == -1 {
-			t.Error("manager is empty")
+			t.Error("no id")
+			return
+		}
+
+		m.Dequeue(1)
+		m.Dequeue(2)
+	})
+
+	t.Run("should return no id", func(t *testing.T) {
+		id, ok := m.GetFirstID()
+		if ok || id != -1 {
+			t.Error("got id")
 			return
 		}
 	})
 
-	t.Run("should return the same buffer if it exists", func(t *testing.T) {
-		m := NewManager()
+	t.Run("should return no buffer", func(t *testing.T) {
+		b := m.Dequeue(2)
+		if b != nil {
+			t.Error("got buffer")
+			return
+		}
+	})
+}
+func TestReaderManager(t *testing.T) {
+	m := NewReaderManager()
+	
+	t.Run("should append and clear buffer", func(t *testing.T) {
+		m.AppendBuffer(1, []int32{1, 2, 3})
+		m.CloseBuffer(1)
+	})
+}
 
-		b1, _ := m.TryNewBuffer(1)
-		b1.AppendBuffer([]int32{1})
+func TestSplitter(t *testing.T) {
+	t.Run("should split once", func(t *testing.T) {
+		b := []int32{1, 2, 3, 4}
 
-		b2 := m.NewBuffer(1)
-		if b1.Buffer[0] != b2.Buffer[0] {
-			t.Error("buffer data mismatch")
+		split := SplitBuffer(b)
+		if len(split) != 1 {
+			t.Error("buffer isn't split")
+			return
+		}
+		if len(split[0]) != 4 {
+			t.Error("buffer slice has missing element")
+			return
+		}
+	})
+
+	t.Run("should split twice", func(t *testing.T) {
+		var b []int32
+		for i := range 32 {
+			b = append(b, int32(i))
+		}
+
+		split := SplitBuffer(b)
+		if len(split) != 2 {
+			t.Error("unexpected split length")
+			return
+		}
+		if len(split[0]) != MAXIMUM_BUFFER_LENGTH {
+			t.Error("buffer slice has missing element")
+			return
+		}
+		if len(split[1]) > MAXIMUM_BUFFER_LENGTH {
+			t.Error("buffer slice overflowing count")
 			return
 		}
 	})
