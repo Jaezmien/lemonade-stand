@@ -8,7 +8,7 @@
 
 # Usage
 ```bash
-$ ./stand-linux-arch64
+$ sudo ./stand-linux-arch64
 ```
 ```cmd
 > stand-windows-arch64.exe
