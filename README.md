@@ -8,10 +8,10 @@
 
 # Usage
 ```bash
-$ sudo ./stand-linux-arch64
+$ sudo ./stand-linux-amd64
 ```
 ```cmd
-> stand-windows-arch64.exe
+> stand-windows-amd64.exe
 ```
 
 # Building
