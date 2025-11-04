@@ -104,6 +104,11 @@ func main() {
 			fmt.Fprintf(w, "unknown method")
 			return
 		}
+		if i < 0 {
+			w.WriteHeader(400)
+			fmt.Fprintf(w, "invalid appid")
+			return
+		}
 
 		appid := int32(i)
 
