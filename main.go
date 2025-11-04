@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 
 	"git.jaezmien.com/Jaezmien/lemonade-stand/bytebuffer"
@@ -24,6 +25,14 @@ var Version = false
 
 var BuildVersion = "0.0.0-dev"
 var BuildCommit = "dev"
+
+func init() {
+	if runtime.GOOS == "linux" && os.Geteuid() != 0 {
+		fmt.Println("this program needs to run as root!")
+		fmt.Println("use `sudo` or other alternatives.")
+		os.Exit(1)
+	}
+}
 
 func init() {
 	flag.BoolVar(&DeepScan, "deep", false, "Scan deeply by checking each process' memory")
