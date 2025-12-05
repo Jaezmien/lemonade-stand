@@ -2,11 +2,16 @@ package main
 
 import (
 	"log/slog"
+	"time"
 
 	"git.jaezmien.com/Jaezmien/lemonade-stand/bytebuffer"
 	"git.jaezmien.com/Jaezmien/lemonade-stand/encoder"
 	"github.com/gorilla/websocket"
 )
+
+var clientWriteWait = time.Second * 10
+var clientPongWait = time.Second * 60
+var clientPingPeriod = (clientPongWait * 9) / 10
 
 type Client struct {
 	server *Server
@@ -27,6 +32,12 @@ func (c *Client) Close() {
 }
 
 func (c *Client) Read() {
+	c.con.SetReadDeadline(time.Now().Add(clientPongWait))
+	c.con.SetPongHandler(func(appData string) error {
+		c.con.SetReadDeadline(time.Now().Add(clientPongWait))
+		return nil
+	})
+
 readLoop:
 	for {
 		slogAppID := slog.Int("appid", int(c.appid))
@@ -71,16 +82,36 @@ readLoop:
 	c.server.CloseClient(c)
 }
 func (c *Client) Write() {
-	for message := range c.Send {
-		w, err := c.con.NextWriter(websocket.BinaryMessage)
-		if err != nil {
-			c.server.Stand.logger.Debug("error while creating client writer", slog.Any("error", err))
-			continue
-		}
-		w.Write(message)
-		if err := w.Close(); err != nil {
-			c.server.Stand.logger.Debug("error while closing client writer", slog.Any("error", err))
-			continue
+	ticker := time.NewTicker(clientPingPeriod)
+	defer func() {
+		ticker.Stop()
+		c.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.Send:
+			c.con.SetWriteDeadline(time.Now().Add(clientWriteWait))
+			if !ok {
+				c.con.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.con.NextWriter(websocket.BinaryMessage)
+			if err != nil {
+				c.server.Stand.logger.Debug("error while creating client writer", slog.Any("error", err))
+				continue
+			}
+			w.Write(message)
+			if err := w.Close(); err != nil {
+				c.server.Stand.logger.Debug("error while closing client writer", slog.Any("error", err))
+				continue
+			}
+		case <-ticker.C:
+			c.con.SetWriteDeadline(time.Now().Add(clientWriteWait))
+			if err := c.con.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
 		}
 	}
 }
