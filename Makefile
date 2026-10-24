@@ -2,7 +2,7 @@ FILENAME = stand
 BUILD_DIR = ./build
 
 GOARCH = amd64
-VERSION = 1.1.0
+VERSION = 1.1.1
 COMMIT = $(shell git rev-parse --short HEAD)
 
 LDFLAGS = -ldflags "-X main.BuildVersion=${VERSION} -X main.BuildCommit=${COMMIT}"
