@@ -10,7 +10,7 @@ func TestWriterManager(t *testing.T) {
 	t.Run("should create and delete buffer", func(t *testing.T) {
 		m.Queue(1, &WriterBuffer{
 			Buffer: []int32{1, 2, 3},
-			Set: BUFFER_END,
+			Set:    BUFFER_END,
 		})
 
 		b := m.Dequeue(1)
@@ -23,11 +23,11 @@ func TestWriterManager(t *testing.T) {
 	t.Run("should return an id", func(t *testing.T) {
 		m.Queue(1, &WriterBuffer{
 			Buffer: []int32{1, 2, 3},
-			Set: BUFFER_END,
+			Set:    BUFFER_END,
 		})
 		m.Queue(2, &WriterBuffer{
 			Buffer: []int32{1, 2, 3},
-			Set: BUFFER_END,
+			Set:    BUFFER_END,
 		})
 
 		id, ok := m.GetFirstID()
@@ -62,7 +62,7 @@ func TestWriterManager(t *testing.T) {
 }
 func TestReaderManager(t *testing.T) {
 	m := NewReaderManager()
-	
+
 	t.Run("should append and clear buffer", func(t *testing.T) {
 		m.AppendBuffer(1, []int32{1, 2, 3})
 		m.CloseBuffer(1)

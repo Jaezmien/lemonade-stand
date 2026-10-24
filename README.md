@@ -3,20 +3,23 @@
 # 🍋 Lemonade Stand
 
 > A centralized hub for interacting with [Lemonade](https://github.com/Jaezmien/lemonade).
- 
+
 </div>
 
 # Usage
+
 ```bash
 $ sudo ./stand-linux-amd64
 ```
+
 ```cmd
 > stand-windows-amd64.exe
 ```
 
 # Building
+
 ```bash
-# Requires Go 1.25.3+ 
+# Requires Go 1.25.3+
 
 $ go mod tidy
 $ make
@@ -24,13 +27,13 @@ $ make
 
 # Flags
 
-| Name | Required | Default | Description |
-| --- | --- | --- | --- |
-| `deep` | No | `false` | Scans for NotITG by forcefully reading every program's memory |
-| `pid` | No | `0` | Use a specific process |
-| `verbose` | No | `false` | Enable debug messages |
-| `port` | No | `8000` | The default port to run the server on |
-| `version` | No | `false` | Shows the version of the binary, and exits |
+| Name      | Required | Default | Description                                                   |
+| --------- | -------- | ------- | ------------------------------------------------------------- |
+| `deep`    | No       | `false` | Scans for NotITG by forcefully reading every program's memory |
+| `pid`     | No       | `0`     | Use a specific process                                        |
+| `verbose` | No       | `false` | Enable debug messages                                         |
+| `port`    | No       | `8000`  | The default port to run the server on                         |
+| `version` | No       | `false` | Shows the version of the binary, and exits                    |
 
 # Routes
 
@@ -40,19 +43,19 @@ Returns either an empty array, or an integer array of the entire current values 
 
 ## GET `/ws`
 
-| Query | Type | Required | Description |
-| --- | --- | --- | --- |
-| `appid` | `int` | yes | The application id the client will be listening on |
+| Query   | Type  | Required | Description                                        |
+| ------- | ----- | -------- | -------------------------------------------------- |
+| `appid` | `int` | yes      | The application id the client will be listening on |
 
 ### Receiving Messages
 
 The websocket client will be receiving a `binary` message, with the first byte of data indicating the type of message.
 
-| Value | Description | Notes |
-| --- | --- | --- |
-| `0x1` | NotITG has initialized | The next four bytes are the `MAJOR`, `MINOR`, `PATCH`, and an additional `MISC` version of NotITG. (e.g. v4.9 maps to `0x4, 0x9, 0x0, 0x0`) |
-| `0x2` | NotITG has exited | |
-| `0x3` | NotITG has sent a buffer to the client | The buffer content is the rest of the data after `0x3`. |
+| Value | Description                            | Notes                                                                                                                                       |
+| ----- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0x1` | NotITG has initialized                 | The next four bytes are the `MAJOR`, `MINOR`, `PATCH`, and an additional `MISC` version of NotITG. (e.g. v4.9 maps to `0x4, 0x9, 0x0, 0x0`) |
+| `0x2` | NotITG has exited                      |                                                                                                                                             |
+| `0x3` | NotITG has sent a buffer to the client | The buffer content is the rest of the data after `0x3`.                                                                                     |
 
 ### Sending Messages
 

@@ -119,16 +119,16 @@ func (l *LemonadeStand) HasInitialized() bool {
 }
 
 // Returns the current version of NotITG as 4 bytes.
-// 
+//
 // Format follows { major, minor, patch, misc }
 func (l *LemonadeStand) VersionAsBytes() []byte {
 	if l.NotITG == nil {
-		return []byte{};
+		return []byte{}
 	}
 
 	b := VersionsAsBytes[l.NotITG.Version]
 	if b == nil {
-		return []byte{};
+		return []byte{}
 	}
 
 	return b
