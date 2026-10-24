@@ -1,6 +1,8 @@
 package main
 
 import (
+	"slices"
+
 	"git.jaezmien.com/Jaezmien/lemonade-stand/buffer"
 	"github.com/gorilla/websocket"
 )
@@ -57,7 +59,7 @@ func (s *Server) JoinClient(c *Client) {
 	s.Clients[c] = true
 
 	if s.Stand.HasNotITG() {
-		c.Send <- []byte{0x01}
+		c.Send <- slices.Concat([]byte{0x01}, s.Stand.VersionAsBytes())
 	}
 }
 func (s *Server) CloseClient(c *Client) {

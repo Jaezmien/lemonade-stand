@@ -118,6 +118,22 @@ func (l *LemonadeStand) HasInitialized() bool {
 	return l.initialized
 }
 
+// Returns the current version of NotITG as 4 bytes.
+// 
+// Format follows { major, minor, patch, misc }
+func (l *LemonadeStand) VersionAsBytes() []byte {
+	if l.NotITG == nil {
+		return []byte{};
+	}
+
+	b := VersionsAsBytes[l.NotITG.Version]
+	if b == nil {
+		return []byte{};
+	}
+
+	return b
+}
+
 func (l *LemonadeStand) isInitializing() bool {
 	return l.NotITG.GetExternal(INIT_STATE) != INIT_EXPECTED_VALUE
 }

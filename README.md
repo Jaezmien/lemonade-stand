@@ -50,7 +50,7 @@ The websocket client will be receiving a `binary` message, with the first byte o
 
 | Value | Description | Notes |
 | --- | --- | --- |
-| `0x1` | NotITG has initialized | |
+| `0x1` | NotITG has initialized | The next four bytes are the `MAJOR`, `MINOR`, `PATCH`, and an additional `MISC` version of NotITG. (e.g. v4.9 maps to `0x4, 0x9, 0x0, 0x0`) |
 | `0x2` | NotITG has exited | |
 | `0x3` | NotITG has sent a buffer to the client | The buffer content is the rest of the data after `0x3`. |
 
