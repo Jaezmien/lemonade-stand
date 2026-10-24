@@ -21,6 +21,7 @@ var DeepScan = false
 var ProcessID = 0
 var Verbose = false
 var Port = 8080
+var Listen = false
 var Version = false
 
 var BuildVersion = "0.0.0-dev"
@@ -39,6 +40,7 @@ func init() {
 	flag.IntVar(&ProcessID, "pid", 0, "Use a specific process")
 	flag.BoolVar(&Verbose, "verbose", false, "Enable debug messages")
 	flag.IntVar(&Port, "port", 8000, "Sets the server port")
+	flag.BoolVar(&Listen, "listen", false, "Listen to all network interfaces")
 	flag.BoolVar(&Version, "version", false, "Display version info")
 
 	flag.Parse()
@@ -162,7 +164,14 @@ func main() {
 		w.Write(j)
 	})
 	go func(l *LemonadeStand) {
-		err := http.ListenAndServe(fmt.Sprintf("localhost:%d", Port), nil)
+		intf := "localhost"
+		if Listen {
+			intf = "0.0.0.0"
+		}
+		addr := fmt.Sprintf("%s:%d", intf, Port)
+		l.logger.Info("listening on " + addr)
+
+		err := http.ListenAndServe(addr, nil)
 		if err != nil {
 			l.logger.Error("http error", slog.Any("error", err))
 			l.Close()
