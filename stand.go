@@ -197,6 +197,14 @@ func (l *LemonadeStand) read() {
 	l.NotITG.SetExternal(OUTGOING_ID, 0)
 	l.NotITG.SetExternal(OUTGOING_STATE, STATE_OUTGOING_IDLE)
 
+	l.logger.Debug(
+		"received buffer from notitg",
+		slog.String("data", fmt.Sprintf("%+v", readBuffer)),
+		slog.Int("length", len(readBuffer)),
+		slog.Int("appid", int(appid)),
+		slog.Bool("end", isBufferEnd),
+	)
+
 	if isBufferEnd {
 		data := l.readManager.AppendBuffer(appid, readBuffer)
 
