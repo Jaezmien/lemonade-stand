@@ -201,7 +201,7 @@ func (l *LemonadeStand) read() {
 		data := l.readManager.AppendBuffer(appid, readBuffer)
 
 		if l.OnRead != nil {
-			l.OnRead(l, appid, readBuffer)
+			l.OnRead(l, appid, data)
 		}
 
 		l.logger.Debug(
